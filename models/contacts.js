@@ -1,32 +1,75 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { nanoid } from 'nanoid';
 
-const contacts = path.resolve('./contacts.json');
-const data = async () => {
+const contacts = path.resolve('./models/contacts.json');
+
+export const listContacts = async () => {
 	try {
 		const data = await fs.readFile(contacts, 'utf8');
-		return data;
+		const results = await JSON.parse(data);
+		return results;
 	} catch (err) {
 		return err;
 	}
 };
 
-const listContacts = async () => {
-	console.log(data);
+export const getContactById = async (contactId) => {
+	try {
+		const contactList = await listContacts();
+		const foundContact = contactList.find(
+			(contact) => contact.id === contactId
+		);
+		return foundContact;
+	} catch (err) {
+		return err;
+	}
 };
 
-const getContactById = async (contactId) => {};
+export const removeContact = async (contactId) => {
+	try {
+		const contactList = await listContacts();
+		const newList = contactList.filter((contact) => contact.id !== contactId);
+		const data = JSON.stringify(newList);
+		await fs.writeFile(contacts, data);
+	} catch (err) {
+		return err;
+	}
+};
 
-const removeContact = async (contactId) => {};
+export const addContact = async (body) => {
+	try {
+		const newItem = {
+			id: nanoid(21),
+			...body,
+		};
+		const contactList = await listContacts();
+		const newList = [...contactList, newItem];
+		const data = JSON.stringify(newList);
+		await fs.writeFile(contacts, data);
+	} catch (err) {
+		return err;
+	}
+};
 
-const addContact = async (body) => {};
-
-const updateContact = async (contactId, body) => {};
-
-export default {
-	listContacts,
-	getContactById,
-	removeContact,
-	addContact,
-	updateContact,
+export const updateContact = async (contactId, body) => {
+	const foundContact = await getContactById(contactId);
+	if (foundContact) {
+		try {
+			const { name, email, phone } = body;
+			const contactList = await listContacts();
+			const newList = contactList.map((contact) => {
+				if (contact.id === contactId) {
+					return { ...contact, name, email, phone };
+				}
+				throw new Error(404);
+			});
+			const data = JSON.stringify(newList);
+			await fs.writeFile(contacts, data);
+		} catch (err) {
+			return err;
+		}
+	} else {
+		throw new Error(404);
+	}
 };
