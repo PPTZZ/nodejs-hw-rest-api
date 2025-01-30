@@ -54,10 +54,10 @@ export const updateStatusContact = async (contactId, favorite) => {
         console.log(foundContact);
         
 		if (foundContact) {
-			if (foundContact.favorite !== favorite) {
+			if (foundContact.favorite !== favorite.favorite) {
 				await Contact.findByIdAndUpdate(contactId, favorite);
 			} else {
-				throw new Error(`Contact already ${favorite}`);
+				throw new Error(`Contact already ${favorite.favorite}`);
 			}
 		} else {
 			throw new Error('Contact not found');
