@@ -1,22 +1,15 @@
 import { Router } from 'express';
 import {
-	listContacts,
-	getContactById,
-	removeContact,
 	addContact,
+	getContactById,
+	listContacts,
+	removeContact,
 	updateContact,
-} from '../../models/contacts.js';
-import Joi from 'joi';
+	updateStatusContact,
+} from '../../service/controllers/contacts.js';
+import { joiSchema, favoriteJoiSchema } from '../../service/schemas/Joi.js';
 
 const router = Router();
-const schema = Joi.object({
-	name: Joi.string().alphanum().min(3).max(30),
-	email: Joi.string().email({
-		minDomainSegments: 2,
-		tlds: { allow: ['com', 'net'] },
-	}),
-	phone: Joi.number(),
-});
 
 router.get('/', async (req, res, next) => {
 	try {
@@ -33,20 +26,20 @@ router.get('/:contactId', async (req, res, next) => {
 });
 
 router.post('/', async (req, res, next) => {
-	const { name, email, phone } = req.body;
-	if (!name || !email || !phone) {
+	const { name, email, phone, favorite } = req.body;
+	if (!name || !email || !phone || !favorite) {
 		return res.status(400).json({ error: 'Fields cannot be empty' });
 	}
 	try {
-		const value = await schema.validateAsync({ name, email, phone });
+		const value = await joiSchema.validateAsync(req.body);
 		if (value) {
-			await addContact({ name, email, phone });
+			await addContact(req.body);
 			res.status(201).json({ message: 'Added contact' });
 		}
 	} catch (err) {
 		res
 			.status(400)
-			.json({ message: 'One or more fields are incorect please check body' });
+			.json({ error: 'One or more fields are invalid pleas check body' });
 	}
 });
 
@@ -60,17 +53,28 @@ router.delete('/:contactId', async (req, res, next) => {
 });
 
 router.put('/:contactId', async (req, res, next) => {
-	const { name, email, phone } = req.body;
 	try {
-		const value = await schema.validateAsync({ name, email, phone });
+		const value = await joiSchema.validateAsync(req.body);
 		if (value) {
-			await updateContact(req.params.contactId,{ name, email, phone });
+			await updateContact(req.params.contactId, req.body);
 			res.status(200).json({ message: 'Updated contact' });
 		}
 	} catch (err) {
 		res
 			.status(400)
 			.json({ message: 'One or more fields are incorect please check body' });
+	}
+});
+
+router.patch('/:contactId/favorite', async (req, res) => {
+	try {
+		const value = await favoriteJoiSchema.validateAsync(req.body);
+		if (value) {
+			await updateStatusContact(req.params.contactId, req.body);
+			res.status(200).json({ message: 'Updated contact' });
+		}
+	} catch (err) {
+		res.status(400).json(err.message);
 	}
 });
 
