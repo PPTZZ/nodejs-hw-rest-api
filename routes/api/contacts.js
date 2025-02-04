@@ -1,31 +1,17 @@
 import { Router } from 'express';
-import {
-	addContact,
-	getContactById,
-	listContacts,
-	removeContact,
-	updateContact,
-	updateStatusContact,
-} from '../../service/controllers/contacts.js';
 import { joiSchema, favoriteJoiSchema } from '../../service/schemas/Joi.js';
+import { getContactsController } from '../../service/controllers/contacts.js';
 
-const router = Router();
+const contactsRouter = Router();
 
-router.get('/', async (req, res, next) => {
-	try {
-		const contacts = await listContacts();
-		res.json(contacts);
-	} catch (err) {
-		res.status(400);
-	}
-});
+contactsRouter.get('/', auth, getContactsController => {});
 
-router.get('/:contactId', async (req, res, next) => {
+contactsRouter.get('/:contactId', async (req, res, next) => {
 	const foundContact = await getContactById(req.params.contactId);
 	res.json(foundContact);
 });
 
-router.post('/', async (req, res, next) => {
+contactsRouter.post('/', async (req, res, next) => {
 	const { name, email, phone, favorite } = req.body;
 	if (!name || !email || !phone || !favorite) {
 		return res.status(400).json({ error: 'Fields cannot be empty' });
@@ -43,7 +29,7 @@ router.post('/', async (req, res, next) => {
 	}
 });
 
-router.delete('/:contactId', async (req, res, next) => {
+contactsRouter.delete('/:contactId', async (req, res, next) => {
 	try {
 		await removeContact(req.params.contactId);
 		res.json({ message: 'contact deleted' });
@@ -52,7 +38,7 @@ router.delete('/:contactId', async (req, res, next) => {
 	}
 });
 
-router.put('/:contactId', async (req, res, next) => {
+contactsRouter.put('/:contactId', async (req, res, next) => {
 	try {
 		const value = await joiSchema.validateAsync(req.body);
 		if (value) {
@@ -66,7 +52,7 @@ router.put('/:contactId', async (req, res, next) => {
 	}
 });
 
-router.patch('/:contactId/favorite', async (req, res) => {
+contactsRouter.patch('/:contactId/favorite', async (req, res) => {
 	try {
 		const value = await favoriteJoiSchema.validateAsync(req.body);
 		if (value) {
@@ -78,4 +64,4 @@ router.patch('/:contactId/favorite', async (req, res) => {
 	}
 });
 
-export default router;
+export default contactsRouter;

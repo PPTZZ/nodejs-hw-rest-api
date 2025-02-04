@@ -2,10 +2,10 @@ import express, { json, urlencoded } from 'express';
 import mongoose from 'mongoose';
 import logger from 'morgan';
 import cors from 'cors';
-import dotenv from 'dotenv';
+import'dotenv/config';
 import contactsRouter from './routes/api/contacts.js';
 
-dotenv.config();
+
 const app = express();
 
 const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short';
