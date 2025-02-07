@@ -2,13 +2,16 @@ import { Router } from 'express';
 import {
 	createUserController,
 	loginUserController,
-	updateUserController,
-    getCurrentUsernameController
-} from '../../service/controllers/usersController';
+    getCurrentUserController,
+	logOutUserController
+} from '../../service/controllers/usersController.js';
+import auth from '../../middleware/auth.js';
 
 const usersRouter = Router();
 
-usersRouter.post('/users/signup', createUserController);
-usersRouter.post('/users/login', loginUserController);
-usersRouter.patch('/users/:userId/logout', auth, updateUserController);
-usersRouter.get('/', auth, getCurrentUsernameController);
+usersRouter.post('/signup', createUserController);
+usersRouter.post('/login', loginUserController);
+usersRouter.patch('/:userId/logout', auth, logOutUserController);
+usersRouter.get('/current',auth, getCurrentUserController);
+
+export default usersRouter

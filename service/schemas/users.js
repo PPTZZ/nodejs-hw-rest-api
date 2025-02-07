@@ -21,6 +21,11 @@ const userSchema = new Schema({
 		type: String,
 		default: null,
 	},
+	subscription: {
+		type: String,
+		enum: ['starter', 'pro', 'business'],
+		default: 'starter',
+	},
 });
 
 userSchema.methods.setPassword = function (password) {
@@ -28,7 +33,13 @@ userSchema.methods.setPassword = function (password) {
 };
 
 userSchema.methods.validatePassword = function (password) {
-	return bcrypt.compareSync(password, this.password);
+	try {
+		console.log('Comparing:', password, this.password);
+		return bcrypt.compareSync(password, this.password);
+	} catch (err) {
+		console.error('Password comparison failed:', err);
+		return false;
+	}
 };
 
 export const User = model('user', userSchema);
