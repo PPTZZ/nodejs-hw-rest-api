@@ -1,68 +1,117 @@
-import { Contact } from '../schemas/contacts.js';
-export const listContacts = async () => {
-	try {
-		const data = Contact.find({});
-		return data;
-	} catch (err) {
-		return err;
-	}
-};
+import {
+	addContact,
+	getAllContacts,
+	getContactById,
+	removeContact,
+	updateContact,
+	updateStatusContact,
+	validateBody,
+} from '../index.js';
+import { joiSchema, favoriteJoiSchema } from '../schemas/joi.js';
 
-export const getContactById = async contactId => {
+export const getContactsController = async (req, res, next) => {
+	const results = await getAllContacts();
 	try {
-		const data = await Contact.findById(contactId);
-		return data;
-	} catch (err) {
-		return err;
-	}
-};
-
-export const removeContact = async contactId => {
-	try {
-		await Contact.deleteOne({ _id: contactId });
-	} catch (err) {
-		return err;
-	}
-};
-
-export const addContact = async body => {
-	try {
-		await Contact.create({
-			...body,
+		res.status(200).json({
+			message: 'Success',
+			code: 200,
+			data: results,
 		});
 	} catch (err) {
-		throw new Error(err.message);
+		res.status(404).json({
+			message: 'Nu au fost gasite contacte in DB',
+			code: 404,
+		});
+		next(err);
 	}
 };
 
-export const updateContact = async (contactId, body) => {
+export const getContactByIdController = async (req, res, next) => {
+	const results = await getContactById(req.params.contactId);
+	if (!results) {
+		throw new Error();
+	}
 	try {
-		const foundContact = await getContactById(contactId);
-		if (foundContact) {
-			await Contact.findByIdAndUpdate(contactId, body);
-		} else {
-			throw new Error(404);
-		}
+		res.status(200).json({
+			message: 'Success',
+			code: 200,
+			data: results,
+		});
 	} catch (err) {
-		throw new Error(err.message);
+		res.status(404).json({
+			message: 'Nu s-a gasit nici un contact cu acest id',
+			code: 404,
+		});
+		next(err);
 	}
 };
 
-export const updateStatusContact = async (contactId, favorite) => {
+export const addContactContorller = async (req, res, next) => {
 	try {
-		const foundContact = await getContactById(contactId);
-        console.log(foundContact);
-        
-		if (foundContact) {
-			if (foundContact.favorite !== favorite.favorite) {
-				await Contact.findByIdAndUpdate(contactId, favorite);
-			} else {
-				throw new Error(`Contact already ${favorite.favorite}`);
-			}
-		} else {
-			throw new Error('Contact not found');
-		}
+		await validateBody(req.body, joiSchema);
+		await addContact(req.body);
+		res.status(200).json({
+			message: 'Success',
+			code: 200,
+		});
 	} catch (err) {
-		throw new Error(err.message);
+		res.status(401).json({
+			message: 'One or more fields is invalid, pleascheck and try again',
+			code: 401,
+		});
+		next(err);
+	}
+};
+
+export const deleteContactController = async (req, res, next) => {
+	const results = await getContactById(req.params.contactId);
+	if (!results) {
+		throw new Error();
+	}
+	try {
+		await removeContact(req.params.contactId);
+		res.status(200).json({
+			message: 'Contact deleted',
+			code: 200,
+		});
+	} catch (err) {
+		res.status(404).json({
+			message: 'Nu s-a gasit nici un contact cu acest id',
+			code: 404,
+		});
+		next(err);
+	}
+};
+
+export const updateContactController = async (req, res, next) => {
+	const results = await getContactById(req.params.contactId);
+	if (!results) {
+		throw new Error();
+	}
+	try {
+		await updateContact(req.params.contactId, req.body);
+	} catch (err) {
+		res.status(404).json({
+			message: 'Nu s-a gasit nici un contact cu acest id',
+			code: 404,
+		});
+		next(err);
+	}
+};
+
+export const updateStatusController = async (req, res, next) => {
+	const results = await getContactById(req.params.contactId);
+	if (!results) {
+		throw new Error();
+	}
+	try {
+		await validateBody(req.body, favoriteJoiSchema);
+		await updateStatusContact(req.params.contactId, req.body);
+	} catch (err) {
+		res.status(404).json({
+			message: 'Nu s-a gasit nici un contact cu acest id',
+			code: 404,
+		});
+		next(err);
 	}
 };
