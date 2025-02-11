@@ -1,5 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcrypt';
+import gravatar from 'gravatar';
 
 const userSchema = new Schema({
 	name: {
@@ -26,6 +27,11 @@ const userSchema = new Schema({
 		enum: ['starter', 'pro', 'business'],
 		default: 'starter',
 	},
+	avatar: {
+		type: String,
+		minLength: 2,
+		default: null,
+	},
 });
 
 userSchema.methods.setPassword = function (password) {
@@ -41,5 +47,19 @@ userSchema.methods.validatePassword = function (password) {
 		return false;
 	}
 };
+
+userSchema.pre('save', function (next) {
+	if (!this.avatarUrl) {
+		this.avatarUrl = gravatar.url(
+			this.email,
+			{
+				s: 200,
+				r: 'pg',
+				d: 'identicon',
+			},
+			true
+		);
+	}
+});
 
 export const User = model('user', userSchema);

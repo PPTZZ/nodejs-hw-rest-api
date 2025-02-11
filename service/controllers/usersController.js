@@ -11,6 +11,8 @@ import { joiLoginSchema, joiSignupSchema } from '../schemas/joi.js';
 
 const SECRET = process.env.JWT_SECRET;
 
+
+
 export const createUserController = async (req, res) => {
 	try {
 		await validateBody(req.body, joiSignupSchema);
