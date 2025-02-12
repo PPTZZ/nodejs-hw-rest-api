@@ -49,6 +49,9 @@ userSchema.methods.validatePassword = function (password) {
 };
 
 userSchema.pre('save', function (next) {
+	if (this.email) {
+		this.email = this.email.trim().toLowerCase();
+	}
 	if (!this.avatarUrl) {
 		this.avatarUrl = gravatar.url(
 			this.email,
@@ -60,6 +63,7 @@ userSchema.pre('save', function (next) {
 			true
 		);
 	}
+	next();
 });
 
 export const User = model('user', userSchema);
