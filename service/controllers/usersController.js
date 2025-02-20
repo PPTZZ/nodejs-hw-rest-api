@@ -111,3 +111,7 @@ export const logOutUserController = async (req, res) => {
 		res.status(401).json(err.message);
 	}
 };
+
+export const addUserAvatarController = async (req, res) => {
+	tr
+};
