@@ -31,6 +31,10 @@ const userSchema = new Schema({
     type: String,
     minLength: 2,
   },
+  verifiedUser: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.methods.setPassword = function (password) {

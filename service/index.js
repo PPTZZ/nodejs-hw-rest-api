@@ -1,6 +1,7 @@
 import { User } from "./schemas/users.js";
 import { Contact } from "./schemas/contacts.js";
 import "dotenv/config";
+import nodemailer from "nodemailer";
 
 // users services
 export const createUser = async (body) => {
@@ -54,9 +55,25 @@ export const findCurrentUser = async (token) => {
       email: user.email,
       subscription: user.subscription,
       avatarURL: user.avatarUrl,
+      verifiedUser: user.verifiedUser,
     };
   } catch (err) {
     err.status = 404;
+    throw err;
+  }
+};
+
+export const validateUserEmail = async (email) => {
+  try {
+    const user = await User.findOne({
+      email,
+    });
+    user.verifiedUser = true;
+    await user.save();
+    console.log('[server] Email verified');
+    
+    return user;
+  } catch (err) {
     throw err;
   }
 };
@@ -151,3 +168,29 @@ export const validateBody = async (data, schema) => {
     throw validationError;
   }
 };
+
+// nodemailer services
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  port: 465,
+  secure: true,
+  auth: {
+    user: process.env.GOOGLE_USER,
+    pass: process.env.GOOGLE_APP_PASSWORD,
+  },
+});
+
+export const sendMail = async (email, token) => {
+  try {
+    await transporter.sendMail({
+      to: email,
+      subject: "Hello feom node",
+      html: `To verify your email please click <a href="http://localhost:3000/api/users/verify-email/${token}">here</a>`,
+    });
+    console.log("[server] Email sent");
+  } catch (err) {
+    console.error(err);
+  }
+};
+
