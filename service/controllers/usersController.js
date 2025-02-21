@@ -11,6 +11,8 @@ import { joiLoginSchema, joiSignupSchema } from '../schemas/joi.js';
 
 const SECRET = process.env.JWT_SECRET;
 
+
+
 export const createUserController = async (req, res) => {
 	try {
 		await validateBody(req.body, joiSignupSchema);
@@ -108,4 +110,8 @@ export const logOutUserController = async (req, res) => {
 	} catch (err) {
 		res.status(401).json(err.message);
 	}
+};
+
+export const addUserAvatarController = async (req, res) => {
+	tr
 };
