@@ -5,6 +5,7 @@ import {
   loginUserController,
   getCurrentUserController,
   logOutUserController,
+  verifiEmailController,
 } from "../../service/controllers/usersController.js";
 import {
   getAvatarController,
@@ -20,6 +21,7 @@ const __dirname = path.dirname(__filename);
 const usersRouter = Router();
 
 usersRouter.post("/signup", createUserController);
+usersRouter.get("/verify-email/:jwt", verifiEmailController);
 usersRouter.post("/login", loginUserController);
 usersRouter.patch("/:userId/logout", auth, logOutUserController);
 usersRouter.get("/current", auth, getCurrentUserController);
