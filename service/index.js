@@ -69,9 +69,7 @@ export const validateUserEmail = async (email) => {
       email,
     });
     user.verifiedUser = true;
-    await user.save();
-    console.log('[server] Email verified');
-    
+    await user.save();  
     return user;
   } catch (err) {
     throw err;
@@ -186,7 +184,7 @@ export const sendMail = async (email, token) => {
     await transporter.sendMail({
       to: email,
       subject: "Hello feom node",
-      html: `To verify your email please click <a href="http://localhost:3000/api/users/verify-email/${token}">here</a>`,
+      html: `<h1 style='font-family:sans-serif;'>To verify your email please click <a style='color:red; font-weight:bold;' href="http://localhost:5000/api/users/verify-email/${token}">here</a></h1>`,
     });
     console.log("[server] Email sent");
   } catch (err) {

@@ -115,11 +115,11 @@ export const logOutUserController = async (req, res) => {
 
 export const verifiEmailController = async (req, res) => {
   try {
-    const token = req.header("Authorization")?.split(" ")[1];
+    const token = req.params.jwt;
     const user = jwt.verify(token, SECRET);
     await validateUserEmail(user.email, token);
     console.log("[server]: Email verified");
-    res.send("Success");
+    res.status(200).send("Success");
   } catch (err) {
     res.status(404).json({
       status: err.status,
